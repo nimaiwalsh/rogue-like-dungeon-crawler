@@ -8,6 +8,7 @@ class Game extends Component {
 
     this.state = {
       boardTyles: [],
+      playerPos: [0,0],
       tyleTypes: {
         player: 1,
         wall: 2,
@@ -34,10 +35,31 @@ class Game extends Component {
   }
 
   createPlayerPos = () => {
-    const { boardTyles } = this.state;
-    const playerPos = [0,0];
-    boardTyles[0][0] = 1;
+    const { boardTyles, playerPos } = this.state;
+    boardTyles[playerPos[0]][playerPos[1]] = 1;
     this.setState({ boardTyles: boardTyles })
+  }
+
+  movePlayer = (direction) => {
+    const { boardTyles, playerPos } = this.state;
+    let playerPosY = playerPos[0];
+    let playerPosX = playerPos[1];
+
+    boardTyles[playerPosY][playerPosX] = 0;
+    if (direction === 'right' && playerPosX < boardTyles.length - 1) {
+      playerPosX += 1;
+    }
+    if (direction === 'left' && playerPosX > 0) {
+      playerPosX -= 1;
+    }
+    if (direction === 'down' && playerPosY < boardTyles.length - 1) {
+      playerPosY += 1;
+    }
+    if (direction === 'up' && playerPosY > 0) {
+      playerPosY -= 1;
+    }
+    boardTyles[playerPosY][playerPosX] = 1;
+    this.setState({ boardTyles: boardTyles, playerPos: [playerPosY, playerPosX] });
   }
 
   handleKeyPress = (e) => {
@@ -45,16 +67,16 @@ class Game extends Component {
     // a/left = 65, w/up = 87, d/right = 68, s/down = 83
     switch (e.keyCode) {
       case 65:
-        console.log('a pressed');
+        this.movePlayer('left');
         break;
       case 87:
-        console.log('w pressed');
+        this.movePlayer('up');
         break;
       case 68: 
-        console.log('d pressed');
+        this.movePlayer('right');
         break;
       case 83:
-        console.log('s pressed');
+        this.movePlayer('down');
         break;
       default: 
         break;
@@ -69,7 +91,7 @@ class Game extends Component {
     for (let i = 0; i < rownum; i++) {
       let row = [];
       for (let j = 0; j < colnum; j++) {
-        row.push('x');
+        row.push(0);
       }
       board.push(row);
     }
