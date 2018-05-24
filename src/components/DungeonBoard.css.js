@@ -17,8 +17,9 @@ export const DungeonGrid = styled('div')`
 export const Tyle = styled('div')`
   color: #FFF;
   background-color: ${props => 
-    props.type === 1 ? 'red' :
+    props.type === 'player' ? 'red' :
     props.type === 'wall' ? 'brown' :
+    props.type.type === 'weapon' ? 'orange' :
     'black' 
   };
   display: flex;

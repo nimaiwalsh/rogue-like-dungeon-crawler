@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import DungeonBoard from './DungeonBoard';
 import Hud from './Hud';
+import { checkNeighbourTyle } from '../utils/checkNeighbourTyle';
 
 class Game extends Component {
   constructor(props) {
@@ -9,22 +10,32 @@ class Game extends Component {
     this.state = {
       boardTyles: [],
       playerPos: [0, 0],
-      tyleTypes: {
-        player: 1,
-        wall: 2,
-        enemy: {
-          level1: 31,
-          level2: 32,
-          level3: 33,
-          boss: 34
+      playerStats: {
+        health: 100,
+        weapon: 'stick',
+        attack: 5,
+        level: 0
+      },
+      gameState: {
+        dungeon: 0
+      },
+      enemies: {
+        level1: {
+          attack: 5,
+          health: 100
         },
-        weapons: {
-          knife: 41,
-          axe: 42,
-          sword: 43,
-          excalibur: 44
+        level2: {
+          attack: 10,
+          health: 100
         },
-        health: 5
+        level3: {
+          attack: 15,
+          health: 100
+        },
+        boss: {
+          attack: 25,
+          health: 200
+        }
       }
     };
   }
@@ -46,13 +57,14 @@ class Game extends Component {
       }
       board.push(row);
     }
-
+    console.log(board)
     this.setState({ boardTyles: board }, this.setUpTyleTypes);
   };
 
   setUpTyleTypes = () => {
     this.createWalls();
     this.createPlayerPos();
+    this.createWeaponTyles();
   };
 
   createWalls = () => {
@@ -63,88 +75,93 @@ class Game extends Component {
     this.setState({ boardTyles: boardTyles });
   };
 
+  createWeaponTyles = () => {
+    const { boardTyles } = this.state;
+    boardTyles[6][3] = {type: 'weapon', class: 'knife'};
+    boardTyles[6][5] = {type: 'weapon', class: 'axe'};
+    boardTyles[6][7] = {type: 'weapon', class: 'sword'};
+    boardTyles[6][9] = {type: 'weapon', class: 'excalibur'};
+    this.setState({ boardTyles: boardTyles });
+  };
+
   createPlayerPos = () => {
     const { boardTyles, playerPos } = this.state;
-    boardTyles[playerPos[0]][playerPos[1]] = 1;
+    boardTyles[playerPos[0]][playerPos[1]] = 'player';
     this.setState({ boardTyles: boardTyles });
   };
 
   handleKeyPress = e => {
     e.preventDefault();
+    //Assign the W, A, S, D keys for movement
     // a/left = 65, w/up = 87, d/right = 68, s/down = 83
     switch (e.keyCode) {
       case 65:
-        this.checkNeighbourTyle('left');
+        this.checkNeighbourTyleAndMove('left');
         break;
       case 87:
-        this.checkNeighbourTyle('up');
+        this.checkNeighbourTyleAndMove('up');
         break;
       case 68:
-        this.checkNeighbourTyle('right');
+        this.checkNeighbourTyleAndMove('right');
         break;
       case 83:
-        this.checkNeighbourTyle('down');
+        this.checkNeighbourTyleAndMove('down');
         break;
       default:
         break;
     }
   };
 
-  checkNeighbourTyle = direction => {
+  checkNeighbourTyleAndMove = direction => {
     const { boardTyles, playerPos } = this.state;
-    let playerPosY = playerPos[0];
-    let playerPosX = playerPos[1];
-    //Do not move if Next tyle is a wall
-    if (direction === 'right' && boardTyles[playerPosY][playerPosX + 1] === 'wall') {
-      return;
-    }
-    if (
-      direction === 'left' && boardTyles[playerPosY][playerPosX - 1] === 'wall'
-    ) {
-      return;
-    }
-    if (direction === 'down' && 
-      boardTyles[playerPosY + 1] !== undefined &&
-      boardTyles[playerPosY + 1][playerPosX] === 'wall' 
-    ) {
-      return;
-    }
-    if (
-      direction === 'up' &&
-      boardTyles[playerPosY - 1] !== undefined &&
-      boardTyles[playerPosY - 1][playerPosX] === 'wall'
-    ) {
-      return;
-    }
+    const playerPosY = playerPos[0];
+    const playerPosX = playerPos[1];
+    let nextPlayerPosY = playerPos[0]
+    let nextPlayerPosX = playerPos[1];
+    let neighbourTyle = null;
 
-    this.movePlayer(direction);
-  };
-
-  movePlayer = direction => {
-    const { boardTyles, playerPos } = this.state;
-    let playerPosY = playerPos[0];
-    let playerPosX = playerPos[1];
-
-    //Set previous player position with blank tyle
-    boardTyles[playerPosY][playerPosX] = 0;
-
+    //Check neighbour tile type and
+    //perform some action depending on the next tyle
+    //update next player position
     if (direction === 'right' && playerPosX < boardTyles.length - 1) {
-      playerPosX += 1;
+      neighbourTyle = boardTyles[playerPosY][playerPosX + 1];
+      nextPlayerPosX += 1;
     }
     if (direction === 'left' && playerPosX > 0) {
-      playerPosX -= 1;
+      neighbourTyle = boardTyles[playerPosY][playerPosX - 1];
+      nextPlayerPosX -= 1;
     }
     if (direction === 'down' && playerPosY < boardTyles.length - 1) {
-      playerPosY += 1;
+      neighbourTyle = boardTyles[playerPosY + 1][playerPosX];
+      nextPlayerPosY += 1;
     }
     if (direction === 'up' && playerPosY > 0) {
-      playerPosY -= 1;
+      neighbourTyle = boardTyles[playerPosY - 1][playerPosX];
+      nextPlayerPosY -= 1;
     }
-    //Update new tyle with new player position
-    boardTyles[playerPosY][playerPosX] = 1;
+    //UTILITY FUNCTIONS FOR EACH TYPE TYPE
+    
+    //Restrict move if it is a wall
+    if (neighbourTyle === 'wall' && neighbourTyle !== undefined) {
+      return;
+    }
+    //Weapon Pickup
+    if (neighbourTyle.type === 'weapon') {
+      return console.log('weapon tyle');
+    }
+    
+    this.movePlayer(playerPosX, playerPosY, nextPlayerPosX, nextPlayerPosY);
+  };
+
+  movePlayer = (playerPosX, playerPosY, nextPlayerPosX, nextPlayerPosY) => {
+    const { boardTyles } = this.state;
+    //Set previous player position with blank tyle
+    boardTyles[playerPosY][playerPosX] = 0;
+    //Update next tile with player tyle
+    boardTyles[nextPlayerPosY][nextPlayerPosX] = 'player';
     this.setState({
       boardTyles: boardTyles,
-      playerPos: [playerPosY, playerPosX]
+      playerPos: [nextPlayerPosY, nextPlayerPosX]
     });
   };
 

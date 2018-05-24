@@ -2,7 +2,7 @@ import React from 'react';
 import { Container, DungeonGrid, Tyle } from './DungeonBoard.css';
 
 const DungeonBoard = ({ tyles }) => {
-  
+
   return (
     <Container>
       <DungeonGrid>
