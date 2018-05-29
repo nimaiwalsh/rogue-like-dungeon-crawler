@@ -1,51 +1,35 @@
 import React, { Component, Fragment } from 'react';
 import DungeonBoard from './DungeonBoard';
 import Hud from './Hud';
-import { checkNeighbourTyle } from '../utils/checkNeighbourTyle';
+import actionTileType from '../utils/tileTypeActions';
 
 class Game extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      boardTyles: [],
+      boardTiles: [],
       playerPos: [0, 0],
       playerStats: {
         health: 100,
         weapon: 'stick',
         attack: 5,
-        level: 0
+        xp: 0,
+        level: 0,
       },
       gameState: {
         dungeon: 0
       },
-      enemies: {
-        level1: {
-          attack: 5,
-          health: 100
-        },
-        level2: {
-          attack: 10,
-          health: 100
-        },
-        level3: {
-          attack: 15,
-          health: 100
-        },
-        boss: {
-          attack: 25,
-          health: 200
-        }
-      }
+      monsters: [],
     };
   }
 
   componentDidMount() {
-    this.createMapTyles();
+    this.createMapTiles();
     document.addEventListener('keydown', this.handleKeyPress);
   }
 
-  createMapTyles = () => {
+  createMapTiles = () => {
     const rownum = 50;
     const colnum = 50;
     let board = [];
@@ -57,37 +41,62 @@ class Game extends Component {
       }
       board.push(row);
     }
-    console.log(board)
-    this.setState({ boardTyles: board }, this.setUpTyleTypes);
+    this.setState({ boardTiles: board }, this.setUpTileTypes);
   };
 
-  setUpTyleTypes = () => {
+  setUpTileTypes = () => {
     this.createWalls();
     this.createPlayerPos();
-    this.createWeaponTyles();
+    this.createWeaponTiles();
+    this.createHealthTiles();
+    this.createMonsterTiles();
   };
 
   createWalls = () => {
-    const { boardTyles } = this.state;
-    boardTyles[0][2] = 'wall';
-    boardTyles[1][2] = 'wall';
-    boardTyles[2][2] = 'wall';
-    this.setState({ boardTyles: boardTyles });
+    const { boardTiles } = this.state;
+    boardTiles[0][2] = 'wall';
+    boardTiles[1][2] = 'wall';
+    boardTiles[2][2] = 'wall';
+    this.setState({ boardTiles: boardTiles });
   };
 
-  createWeaponTyles = () => {
-    const { boardTyles } = this.state;
-    boardTyles[6][3] = {type: 'weapon', class: 'knife'};
-    boardTyles[6][5] = {type: 'weapon', class: 'axe'};
-    boardTyles[6][7] = {type: 'weapon', class: 'sword'};
-    boardTyles[6][9] = {type: 'weapon', class: 'excalibur'};
-    this.setState({ boardTyles: boardTyles });
+  createWeaponTiles = () => {
+    const { boardTiles } = this.state;
+    boardTiles[6][3] = { type: 'weapon', typeClass: 'knife' };
+    boardTiles[6][5] = { type: 'weapon', typeClass: 'axe' };
+    boardTiles[6][7] = { type: 'weapon', typeClass: 'sword' };
+    boardTiles[6][9] = { type: 'weapon', typeClass: 'excalibur' };
+    this.setState({ boardTiles: boardTiles });
   };
+
+  createHealthTiles = () => {
+    const { boardTiles } = this.state;
+    boardTiles[8][4] = 'health';
+    boardTiles[8][6] = 'health';
+    this.setState({ boardTiles: boardTiles });
+  }
+
+  createMonsterTiles = () => {
+    const { boardTiles, monsters } = this.state;
+
+    //Randomly create monsters
+    for (let i = 1; i < 4; i++) {
+      monsters.push({type: 'monster', typeClass: 'lvl1', health: 100, pos: [(7+i), i]});
+    }
+    console.log(monsters);
+
+    //Place monsters on the tiles
+    monsters.map(monster => {
+      boardTiles[monster.pos[0]][monster.pos[1]] = monster
+    })
+
+    this.setState({ boardTiles: boardTiles });
+  }
 
   createPlayerPos = () => {
-    const { boardTyles, playerPos } = this.state;
-    boardTyles[playerPos[0]][playerPos[1]] = 'player';
-    this.setState({ boardTyles: boardTyles });
+    const { boardTiles, playerPos } = this.state;
+    boardTiles[playerPos[0]][playerPos[1]] = 'player';
+    this.setState({ boardTiles: boardTiles });
   };
 
   handleKeyPress = e => {
@@ -96,80 +105,81 @@ class Game extends Component {
     // a/left = 65, w/up = 87, d/right = 68, s/down = 83
     switch (e.keyCode) {
       case 65:
-        this.checkNeighbourTyleAndMove('left');
+        this.actionNeighbourTileAndMove('left');
         break;
       case 87:
-        this.checkNeighbourTyleAndMove('up');
+        this.actionNeighbourTileAndMove('up');
         break;
       case 68:
-        this.checkNeighbourTyleAndMove('right');
+        this.actionNeighbourTileAndMove('right');
         break;
       case 83:
-        this.checkNeighbourTyleAndMove('down');
+        this.actionNeighbourTileAndMove('down');
         break;
       default:
         break;
     }
   };
 
-  checkNeighbourTyleAndMove = direction => {
-    const { boardTyles, playerPos } = this.state;
+  actionNeighbourTileAndMove = direction => {
+    const { boardTiles, playerPos } = this.state;
     const playerPosY = playerPos[0];
     const playerPosX = playerPos[1];
-    let nextPlayerPosY = playerPos[0]
+    let nextPlayerPosY = playerPos[0];
     let nextPlayerPosX = playerPos[1];
-    let neighbourTyle = null;
+    let neighbourTile = null;
 
-    //Check neighbour tile type and
-    //perform some action depending on the next tyle
-    //update next player position
-    if (direction === 'right' && playerPosX < boardTyles.length - 1) {
-      neighbourTyle = boardTyles[playerPosY][playerPosX + 1];
+    //Check neighbour tile type
+    //Update next playerpos
+    if (direction === 'right' && playerPosX < boardTiles.length - 1) {
+      neighbourTile = boardTiles[playerPosY][playerPosX + 1];
       nextPlayerPosX += 1;
     }
     if (direction === 'left' && playerPosX > 0) {
-      neighbourTyle = boardTyles[playerPosY][playerPosX - 1];
+      neighbourTile = boardTiles[playerPosY][playerPosX - 1];
       nextPlayerPosX -= 1;
     }
-    if (direction === 'down' && playerPosY < boardTyles.length - 1) {
-      neighbourTyle = boardTyles[playerPosY + 1][playerPosX];
+    if (direction === 'down' && playerPosY < boardTiles.length - 1) {
+      neighbourTile = boardTiles[playerPosY + 1][playerPosX];
       nextPlayerPosY += 1;
     }
     if (direction === 'up' && playerPosY > 0) {
-      neighbourTyle = boardTyles[playerPosY - 1][playerPosX];
+      neighbourTile = boardTiles[playerPosY - 1][playerPosX];
       nextPlayerPosY -= 1;
     }
-    //UTILITY FUNCTIONS FOR EACH TYPE TYPE
-    
-    //Restrict move if it is a wall
-    if (neighbourTyle === 'wall' && neighbourTyle !== undefined) {
-      return;
+  
+    //If next move tile is a wall, don't do anything
+    //If not a wall, perform action based on new tile type
+    if (neighbourTile !== 'wall') {
+      //Perform actions for special tiles such as weapons, enemy battles and powerups
+      //update state with new stats from action tyle
+      let newStateFromAction = actionTileType(neighbourTile, this.state);
+      this.setState( newStateFromAction )
+      //If the tyle is not a monster move player
+      if (neighbourTile.type !== 'monster') {
+        this.movePlayer(playerPosX, playerPosY, nextPlayerPosX, nextPlayerPosY);
+      }
     }
-    //Weapon Pickup
-    if (neighbourTyle.type === 'weapon') {
-      return console.log('weapon tyle');
-    }
-    
-    this.movePlayer(playerPosX, playerPosY, nextPlayerPosX, nextPlayerPosY);
   };
 
   movePlayer = (playerPosX, playerPosY, nextPlayerPosX, nextPlayerPosY) => {
-    const { boardTyles } = this.state;
-    //Set previous player position with blank tyle
-    boardTyles[playerPosY][playerPosX] = 0;
-    //Update next tile with player tyle
-    boardTyles[nextPlayerPosY][nextPlayerPosX] = 'player';
+    const { boardTiles } = this.state;
+    //Set previous player position with blank tile
+    boardTiles[playerPosY][playerPosX] = 0;
+    //Update next tile with player tile
+    boardTiles[nextPlayerPosY][nextPlayerPosX] = 'player';
     this.setState({
-      boardTyles: boardTyles,
+      boardTiles: boardTiles,
       playerPos: [nextPlayerPosY, nextPlayerPosX]
     });
   };
 
   render() {
+    const { playerStats, gameState } = this.state
     return (
       <div>
-        <DungeonBoard tyles={this.state.boardTyles} />
-        <Hud />
+        <Hud playerStats={ playerStats } gameState={ gameState } />
+        <DungeonBoard tiles={this.state.boardTiles} />
       </div>
     );
   }

@@ -1,15 +1,15 @@
 import React from 'react';
-import { Container, DungeonGrid, Tyle } from './DungeonBoard.css';
+import { Container, DungeonGrid, Tile } from './DungeonBoard.css';
 
-const DungeonBoard = ({ tyles }) => {
+const DungeonBoard = ({ tiles }) => {
 
   return (
     <Container>
       <DungeonGrid>
-        {tyles.map(tylerow => {
-          return tylerow.map((tyle, num) => {
+        {tiles.map(tilerow => {
+          return tilerow.map((tile, num) => {
             return (
-              <Tyle key={num} type={tyle}>{num}</Tyle>
+              <Tile key={num} type={tile}>{num}</Tile>
             )
           });
         })}

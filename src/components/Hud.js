@@ -1,9 +1,24 @@
 import React from 'react';
 
-const Hud = () => {
+const Hud = ({ playerStats, gameState }) => {
+
   return (
     <div>
-      HUD
+      <div className="hud__weapon">
+        Weapon: { playerStats.weapon }
+      </div>
+      <div className="hud__attack">
+        Attack: { playerStats.attack }
+      </div>
+      <div className="hud__health">
+        Health: { playerStats.health }
+      </div>
+      <div className="hud__health">
+        XP: { playerStats.xp }
+      </div>
+      <div className="hud__health">
+        Level: { playerStats.level }
+      </div>
     </div>
   );
 };
