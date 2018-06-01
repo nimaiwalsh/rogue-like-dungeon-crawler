@@ -1,18 +1,17 @@
 function actionTileType(neighbourTile, state) {
   //weapon
   if (neighbourTile && neighbourTile.type === 'weapon') {
-    tileTypeAction.weapon(neighbourTile, state);
+    return tileTypeAction.weapon(neighbourTile, state);
   }
   //Health potion
   if (neighbourTile && neighbourTile === 'health') {
-    tileTypeAction.health(neighbourTile, state);
+    return tileTypeAction.health(neighbourTile, state);
   }
   //monster + boss
   if (neighbourTile && neighbourTile.type === 'monster') {
-    tileTypeAction.monster(neighbourTile, state);
+    return tileTypeAction.monster(neighbourTile, state);
   }
   //new dungeon door
-
 } 
 
 //Different actions to perform depending on tile
@@ -35,7 +34,7 @@ const tileTypeAction = {
       default:
         break;
     }
-    playerStats.weapon = neighbourTile.class
+    playerStats.weapon = neighbourTile.typeClass
     return playerStats;
   },
   health: function healthAction(neighbourTile, state) {
@@ -44,14 +43,30 @@ const tileTypeAction = {
     return playerStats;
   },
   monster: function monsterActions(neighbourTile, state) {
-    let { playerStats } = state
+    let { playerStats, monsters, boardTiles } = state
     //Level 1 monster
-    //Attack between 10-20
-    //Health - 20
+    //Random attack between 10 - 20
     if (neighbourTile.typeClass === 'lvl1') {
-      
-      console.log('lvl1 monster')
+      playerStats.health -= 10;
     }
+    //Kill monster or reduce its health
+    monsters.map((monster) => {
+      if (monster.monsterID === neighbourTile.monsterID) {
+        //Perform last attack to kill monster
+        if (monster.health <= playerStats.attack) {
+          monster.health -= playerStats.attack;
+          //remove monster from the board
+          boardTiles[monster.pos[0]][monster.pos[1]] = 'dead';
+        } else {
+          monster.health -= playerStats.attack;
+        }
+      }
+    });
+
+    console.log(monsters);
+
+    return { playerStats, monsters, boardTiles };
+
   }
 }
 

@@ -81,9 +81,8 @@ class Game extends Component {
 
     //Randomly create monsters
     for (let i = 1; i < 4; i++) {
-      monsters.push({type: 'monster', typeClass: 'lvl1', health: 100, pos: [(7+i), i]});
+      monsters.push({type: 'monster', typeClass: 'lvl1', monsterID: i, health: 20, pos: [(7+i), i]});
     }
-    console.log(monsters);
 
     //Place monsters on the tiles
     monsters.map(monster => {
@@ -147,16 +146,16 @@ class Game extends Component {
       neighbourTile = boardTiles[playerPosY - 1][playerPosX];
       nextPlayerPosY -= 1;
     }
-  
+
     //If next move tile is a wall, don't do anything
-    //If not a wall, perform action based on new tile type
     if (neighbourTile !== 'wall') {
       //Perform actions for special tiles such as weapons, enemy battles and powerups
-      //update state with new stats from action tyle
-      let newStateFromAction = actionTileType(neighbourTile, this.state);
-      this.setState( newStateFromAction )
-      //If the tyle is not a monster move player
-      if (neighbourTile.type !== 'monster') {
+      if (neighbourTile !== 0) {
+        let newStateFromAction = actionTileType(neighbourTile, this.state);
+        this.setState( newStateFromAction );
+      }
+      //If the tile is not a monster move player
+      if (neighbourTile !== null && neighbourTile.type !== 'monster') {
         this.movePlayer(playerPosX, playerPosY, nextPlayerPosX, nextPlayerPosY);
       }
     }
