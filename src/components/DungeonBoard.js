@@ -9,7 +9,7 @@ const DungeonBoard = ({ tiles }) => {
         {tiles.map(tilerow => {
           return tilerow.map((tile, num) => {
             return (
-              <Tile key={num} type={tile}>{num}</Tile>
+              <Tile key={num} type={tile}></Tile>
             )
           });
         })}

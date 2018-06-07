@@ -11,7 +11,6 @@ export const DungeonGrid = styled('div')`
   display: grid;
   grid-template-columns: repeat(50, 2rem);
   grid-template-rows: repeat(50, 2rem);
-  border: 1rem solid brown;
 `
 
 export const Tile = styled('div')`

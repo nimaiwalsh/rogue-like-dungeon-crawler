@@ -50,7 +50,7 @@ const tileTypeAction = {
       playerStats.health -= 10;
     }
     //Kill monster or reduce its health
-    monsters.map((monster) => {
+    for (let monster of monsters) {
       if (monster.monsterID === neighbourTile.monsterID) {
         //Perform last attack to kill monster
         if (monster.health <= playerStats.attack) {
@@ -61,7 +61,7 @@ const tileTypeAction = {
           monster.health -= playerStats.attack;
         }
       }
-    });
+    };
 
     console.log(monsters);
 

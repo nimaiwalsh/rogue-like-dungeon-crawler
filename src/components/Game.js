@@ -1,4 +1,6 @@
 import React, { Component, Fragment } from 'react';
+//Dungeon generator NPM package by Matthew Burfield
+import { NewDungeon } from 'random-dungeon-generator';
 import DungeonBoard from './DungeonBoard';
 import Hud from './Hud';
 import actionTileType from '../utils/tileTypeActions';
@@ -9,15 +11,13 @@ class Game extends Component {
 
     this.state = {
       boardTiles: [],
-      playerPos: [0, 0],
+      playerPos: [2, 1],
       playerStats: {
         health: 100,
         weapon: 'stick',
         attack: 5,
         xp: 0,
         level: 0,
-      },
-      gameState: {
         dungeon: 0
       },
       monsters: [],
@@ -27,21 +27,29 @@ class Game extends Component {
   componentDidMount() {
     this.createMapTiles();
     document.addEventListener('keydown', this.handleKeyPress);
+    this.randomPositionGenerator();
   }
 
   createMapTiles = () => {
-    const rownum = 50;
-    const colnum = 50;
-    let board = [];
-    //Create a 50 rows of 50 columns
-    for (let i = 0; i < rownum; i++) {
-      let row = [];
-      for (let j = 0; j < colnum; j++) {
-        row.push(0);
-      }
-      board.push(row);
-    }
-    this.setState({ boardTiles: board }, this.setUpTileTypes);
+    const dungeonOptions = {
+      width: 50,
+      height: 50,
+      minRoomSize: 5,
+      maxRoomSize: 20
+    };
+    const dungeon = NewDungeon(dungeonOptions);
+    // const rownum = 50;
+    // const colnum = 50;
+    // let board = [];
+    // //Create a 50 rows of 50 columns
+    // for (let i = 0; i < rownum; i++) {
+    //   let row = [];
+    //   for (let j = 0; j < colnum; j++) {
+    //     row.push(0);
+    //   }
+    //   board.push(row);
+    // }
+    this.setState({ boardTiles: dungeon }, this.setUpTileTypes);
   };
 
   setUpTileTypes = () => {
@@ -54,20 +62,38 @@ class Game extends Component {
 
   createWalls = () => {
     const { boardTiles } = this.state;
-    boardTiles[0][2] = 'wall';
-    boardTiles[1][2] = 'wall';
-    boardTiles[2][2] = 'wall';
+    //Set a wall tile for every 1 on the board array
+    boardTiles.map(row => {
+      row.map((tile, index, rowArr) => {
+        if (tile === 1) {
+          rowArr[index] = 'wall';
+        }
+      })
+    })
+    
     this.setState({ boardTiles: boardTiles });
   };
 
   createWeaponTiles = () => {
     const { boardTiles } = this.state;
-    boardTiles[6][3] = { type: 'weapon', typeClass: 'knife' };
-    boardTiles[6][5] = { type: 'weapon', typeClass: 'axe' };
-    boardTiles[6][7] = { type: 'weapon', typeClass: 'sword' };
-    boardTiles[6][9] = { type: 'weapon', typeClass: 'excalibur' };
+    let weapons = ['knife', 'axe', 'sword', 'excalibur'];
+     //Drop each weapon in a random position on the board;
+     for (let weapon of weapons) {
+      let pos = this.randomPositionGenerator();
+      //If the tile is already a wall, reproduce a new random position
+      while (boardTiles[pos[0]][pos[1]] && boardTiles[pos[0]][pos[1]] === 'wall') {
+        pos = this.randomPositionGenerator()
+      } 
+      boardTiles[pos[0]][pos[1]] = { type: 'weapon', typeClass: weapon }
+     }
+
     this.setState({ boardTiles: boardTiles });
   };
+
+  randomPositionGenerator = () => {
+    //Generate a random position for row and col
+    return [Math.floor(Math.random() * 50 + 1), Math.floor(Math.random() * 50 + 1)];
+  }
 
   createHealthTiles = () => {
     const { boardTiles } = this.state;

@@ -5609,6 +5609,10 @@ raf@3.4.0:
   dependencies:
     performance-now "^2.1.0"
 
+random-dungeon-generator@^1.0.32:
+  version "1.0.32"
+  resolved "https://registry.yarnpkg.com/random-dungeon-generator/-/random-dungeon-generator-1.0.32.tgz#73afe73c95aad239c7be1528d3cfa7bff24fe0c0"
+
 randomatic@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/randomatic/-/randomatic-3.0.0.tgz#d35490030eb4f7578de292ce6dfb04a91a128923"
