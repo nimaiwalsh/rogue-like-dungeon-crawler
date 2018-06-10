@@ -46,8 +46,16 @@ const tileTypeAction = {
     let { playerStats, monsters, boardTiles } = state
     //Level 1 monster
     //Random attack between 10 - 20
-    if (neighbourTile.typeClass === 'lvl1') {
+    if (neighbourTile.monsterLevel === 1) {
       playerStats.health -= 10;
+    }
+
+    if (neighbourTile.monsterLevel === 2) {
+      playerStats.health -= 20;
+    }
+
+    if (neighbourTile.monsterLevel === 3) {
+      playerStats.health -= 30;
     }
     //Kill monster or reduce its health
     for (let monster of monsters) {
@@ -62,11 +70,8 @@ const tileTypeAction = {
         }
       }
     };
-
-    console.log(monsters);
-
+    
     return { playerStats, monsters, boardTiles };
-
   }
 }
 

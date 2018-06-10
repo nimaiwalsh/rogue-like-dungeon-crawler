@@ -20,10 +20,10 @@ export const Tile = styled('div')`
     props.type === 'wall' ? 'brown' :
     props.type.type === 'weapon' ? 'orange' :
     props.type === 'health' ? 'green' :
-    props.type.typeClass === 'lvl1' ? '#FA4766' :
-    props.type.typeClass === 'lvl2' ? '#F4193F' :
-    props.type.typeClass === 'lvl3' ? '#C50728' :
-    props.type.typeClass === 'boss' ? '#DF0909' :
+    props.type.monsterLevel === 1 ? '#FA4766' :
+    props.type.monsterLevel === 2 ? '#F4193F' :
+    props.type.monsterLevel === 3 ? '#C50728' :
+    props.type.monsterLevel === 'boss' ? '#DF0909' :
     'black' 
   };
   display: flex;

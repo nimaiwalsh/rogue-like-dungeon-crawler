@@ -20,7 +20,7 @@ class Game extends Component {
         level: 0,
         dungeon: 0
       },
-      monsters: [],
+      monsters: []
     };
   }
 
@@ -38,17 +38,7 @@ class Game extends Component {
       maxRoomSize: 20
     };
     const dungeon = NewDungeon(dungeonOptions);
-    // const rownum = 50;
-    // const colnum = 50;
-    // let board = [];
-    // //Create a 50 rows of 50 columns
-    // for (let i = 0; i < rownum; i++) {
-    //   let row = [];
-    //   for (let j = 0; j < colnum; j++) {
-    //     row.push(0);
-    //   }
-    //   board.push(row);
-    // }
+
     this.setState({ boardTiles: dungeon }, this.setUpTileTypes);
   };
 
@@ -68,59 +58,98 @@ class Game extends Component {
         if (tile === 1) {
           rowArr[index] = 'wall';
         }
-      })
-    })
-    
-    this.setState({ boardTiles: boardTiles });
-  };
-
-  createWeaponTiles = () => {
-    const { boardTiles } = this.state;
-    let weapons = ['knife', 'axe', 'sword', 'excalibur'];
-     //Drop each weapon in a random position on the board;
-     for (let weapon of weapons) {
-      let pos = this.randomPositionGenerator();
-      //If the tile is already a wall, reproduce a new random position
-      while (boardTiles[pos[0]][pos[1]] && boardTiles[pos[0]][pos[1]] === 'wall') {
-        pos = this.randomPositionGenerator()
-      } 
-      boardTiles[pos[0]][pos[1]] = { type: 'weapon', typeClass: weapon }
-     }
+      });
+    });
 
     this.setState({ boardTiles: boardTiles });
   };
-
-  randomPositionGenerator = () => {
-    //Generate a random position for row and col
-    return [Math.floor(Math.random() * 50 + 1), Math.floor(Math.random() * 50 + 1)];
-  }
-
-  createHealthTiles = () => {
-    const { boardTiles } = this.state;
-    boardTiles[8][4] = 'health';
-    boardTiles[8][6] = 'health';
-    this.setState({ boardTiles: boardTiles });
-  }
-
-  createMonsterTiles = () => {
-    const { boardTiles, monsters } = this.state;
-
-    //Randomly create monsters
-    for (let i = 1; i < 4; i++) {
-      monsters.push({type: 'monster', typeClass: 'lvl1', monsterID: i, health: 20, pos: [(7+i), i]});
-    }
-
-    //Place monsters on the tiles
-    monsters.map(monster => {
-      boardTiles[monster.pos[0]][monster.pos[1]] = monster
-    })
-
-    this.setState({ boardTiles: boardTiles });
-  }
 
   createPlayerPos = () => {
     const { boardTiles, playerPos } = this.state;
     boardTiles[playerPos[0]][playerPos[1]] = 'player';
+    this.setState({ boardTiles: boardTiles });
+  };
+
+  createWeaponTiles = () => {
+    let weapons = ['knife', 'axe', 'sword', 'excalibur'];
+
+    for (let weapon of weapons) {
+      this.placeTileOnBoard({ type: 'weapon', typeClass: weapon });
+    }
+  };
+
+  createHealthTiles = () => {
+    //3 health tiles 
+    for (let i = 0; i < 3; i++) {
+      this.placeTileOnBoard('health');
+    }
+  };
+
+  createMonsterTiles = () => {
+    const { monsters } = this.state;
+    //Create monsters 
+    //lvl1
+    for (let i = 0; i < 3; i++) {
+      monsters.push({
+        type: 'monster',
+        monsterLevel: 1,
+        monsterID: `${i}lvl1`,
+        health: 20,
+        pos: []
+      });
+    }
+    //lvl2
+    for (let i = 0; i < 2; i++) {
+      monsters.push({
+        type: 'monster',
+        monsterLevel: 2,
+        monsterID: `${i}lvl2`,
+        health: 30,
+        pos: []
+      });
+    }
+    //lvl3
+    for (let i = 0; i < 2; i++) {
+      monsters.push({
+        type: 'monster',
+        monsterLevel: 3,
+        monsterID: `${i}lvl3`,
+        health: 40,
+        pos: []
+      });
+    }
+    //Place monsters on the tiles
+    for (let monster of monsters ) {
+      this.placeTileOnBoard(monster);
+    }
+
+    this.setState({ monsters: monsters });
+  };
+
+  randomPositionGenerator = () => {
+    //Generate a random position for row and col
+    return [
+      Math.floor(Math.random() * 49 + 1),
+      Math.floor(Math.random() * 49 + 1)
+    ];
+  };
+
+  placeTileOnBoard = (tiletype) => {
+    const { boardTiles, monsters } = this.state;
+    let pos = this.randomPositionGenerator();
+    //If tile pos is a wall, generate new pos
+    while (
+      boardTiles[pos[0]][pos[1]] === 'wall'
+    ) {
+      pos = this.randomPositionGenerator();
+    }
+    //If tiletype is a monster, add the position to tile for reference
+    if (tiletype && tiletype.type === 'monster') {
+      tiletype.pos = pos;
+    }
+
+    boardTiles[pos[0]][pos[1]] = tiletype;
+
     this.setState({ boardTiles: boardTiles });
   };
 
@@ -178,7 +207,7 @@ class Game extends Component {
       //Perform actions for special tiles such as weapons, enemy battles and powerups
       if (neighbourTile !== 0) {
         let newStateFromAction = actionTileType(neighbourTile, this.state);
-        this.setState( newStateFromAction );
+        this.setState(newStateFromAction);
       }
       //If the tile is not a monster move player
       if (neighbourTile !== null && neighbourTile.type !== 'monster') {
@@ -200,10 +229,10 @@ class Game extends Component {
   };
 
   render() {
-    const { playerStats, gameState } = this.state
+    const { playerStats, gameState } = this.state;
     return (
       <div>
-        <Hud playerStats={ playerStats } gameState={ gameState } />
+        <Hud playerStats={playerStats} gameState={gameState} />
         <DungeonBoard tiles={this.state.boardTiles} />
       </div>
     );
