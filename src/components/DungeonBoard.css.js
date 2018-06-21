@@ -20,6 +20,7 @@ export const Tile = styled('div')`
     props.type === 'wall' ? 'brown' :
     props.type.type === 'weapon' ? 'orange' :
     props.type === 'health' ? 'green' :
+    props.type === 'dungeonDoor' ? 'yellow' :
     props.type.monsterLevel === 1 ? '#FA4766' :
     props.type.monsterLevel === 2 ? '#F4193F' :
     props.type.monsterLevel === 3 ? '#C50728' :

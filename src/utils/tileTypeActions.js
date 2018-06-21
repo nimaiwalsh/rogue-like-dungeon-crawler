@@ -11,7 +11,6 @@ function actionTileType(neighbourTile, state) {
   if (neighbourTile && neighbourTile.type === 'monster') {
     return tileTypeAction.monster(neighbourTile, state);
   }
-  //new dungeon door
 } 
 
 //Different actions to perform depending on tile

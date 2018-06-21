@@ -19,6 +19,9 @@ const Hud = ({ playerStats, gameState }) => {
       <div className="hud__health">
         Level: { playerStats.level }
       </div>
+      <div className="hud__health">
+        Dungeon: { playerStats.dungeon }
+      </div>
     </div>
   );
 };
