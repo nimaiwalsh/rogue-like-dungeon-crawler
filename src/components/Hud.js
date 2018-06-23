@@ -1,28 +1,29 @@
 import React from 'react';
+import HudContainer from './Hud.css';
 
 const Hud = ({ playerStats, gameState }) => {
 
   return (
-    <div>
-      <div className="hud__weapon">
+    <HudContainer>
+      <div className="weapon">
         Weapon: { playerStats.weapon }
       </div>
-      <div className="hud__attack">
+      <div className="attack">
         Attack: { playerStats.attack }
       </div>
-      <div className="hud__health">
+      <div className="health">
         Health: { playerStats.health }
       </div>
-      <div className="hud__health">
+      <div className="xp">
         XP: { playerStats.xp }
       </div>
-      <div className="hud__health">
+      <div className="level">
         Level: { playerStats.level }
       </div>
-      <div className="hud__health">
+      <div className="dungeon">
         Dungeon: { playerStats.dungeon }
       </div>
-    </div>
+    </HudContainer>
   );
 };
 

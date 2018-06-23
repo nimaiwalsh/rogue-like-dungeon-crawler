@@ -3,6 +3,7 @@ import React, { Component, Fragment } from 'react';
 import { NewDungeon } from 'random-dungeon-generator';
 import DungeonBoard from './DungeonBoard';
 import Hud from './Hud';
+import Modal from './StatusModel';
 import actionTileType from '../utils/tileTypeActions';
 
 class Game extends Component {
@@ -14,19 +15,29 @@ class Game extends Component {
       playerPos: [],
       playerStats: {
         health: 100,
+        alive: true,
         weapon: 'stick',
         attack: 5,
         xp: 0,
         level: 0,
-        dungeon: 1
+        dungeon: 1,
       },
-      monsters: []
+      monsters: [],
+      modalVisible: false
     };
   }
 
   componentDidMount() {
     this.createMapTiles();
     document.addEventListener('keydown', this.handleKeyPress);
+  }
+
+  componentDidUpdate() {
+    //Kill player when health falls below 0
+    const { health, alive } = this.state.playerStats;
+    if (health <= 0 && alive) {
+      this.playerDead();
+    }
   }
 
   createMapTiles = () => {
@@ -51,7 +62,7 @@ class Game extends Component {
   };
 
   createWalls = () => {
-    const { boardTiles } = this.state;
+    const boardTiles = [...this.state.boardTiles];
     //Set a wall tile for every 1 on the board array
     boardTiles.map(row => {
       row.map((tile, index, rowArr) => {
@@ -65,7 +76,7 @@ class Game extends Component {
   };
 
   createPlayerPos = () => {
-    this.placeTileOnBoard('player')
+    this.placeTileOnBoard('player');
   };
 
   createWeaponTiles = () => {
@@ -137,7 +148,7 @@ class Game extends Component {
   };
 
   placeTileOnBoard = tiletype => {
-    const { boardTiles, monsters } = this.state;
+    const { boardTiles, monsters } = { ...this.state };
     let pos = this.randomPositionGenerator();
     //If tile pos is a wall, generate new pos
     while (boardTiles[pos[0]][pos[1]] === 'wall') {
@@ -145,7 +156,7 @@ class Game extends Component {
     }
     //If tile is player, update player pos
     if (tiletype === 'player') {
-      this.setState({playerPos: pos})
+      this.setState({ playerPos: pos });
     }
     //If tiletype is a monster, add the position to tile for reference
     if (tiletype && tiletype.type === 'monster') {
@@ -161,21 +172,24 @@ class Game extends Component {
     e.preventDefault();
     //Assign the W, A, S, D keys for movement
     // a/left = 65, w/up = 87, d/right = 68, s/down = 83
-    switch (e.keyCode) {
-      case 65:
-        this.actionNeighbourTileAndMove('left');
-        break;
-      case 87:
-        this.actionNeighbourTileAndMove('up');
-        break;
-      case 68:
-        this.actionNeighbourTileAndMove('right');
-        break;
-      case 83:
-        this.actionNeighbourTileAndMove('down');
-        break;
-      default:
-        break;
+    //Only move when player is alive
+    if (this.state.playerStats.alive) {
+      switch (e.keyCode) {
+        case 65:
+          this.actionNeighbourTileAndMove('left');
+          break;
+        case 87:
+          this.actionNeighbourTileAndMove('up');
+          break;
+        case 68:
+          this.actionNeighbourTileAndMove('right');
+          break;
+        case 83:
+          this.actionNeighbourTileAndMove('down');
+          break;
+        default:
+          break;
+      }
     }
   };
 
@@ -208,7 +222,6 @@ class Game extends Component {
 
     //If next move tile is a wall, don't do anything
     if (neighbourTile !== 'wall') {
-      console.log(neighbourTile);
       //Perform actions for special tiles such as weapons, enemy battles and powerups
       if (neighbourTile !== 0) {
         let newStateFromAction = actionTileType(neighbourTile, this.state);
@@ -217,13 +230,14 @@ class Game extends Component {
       //create a new dungeon if player moves onto dungeonDoor
       if (neighbourTile === 'dungeonDoor') {
         //Clear current monsters/powerups/update dungeon
-        // const { playerStats, playerPos, monsters } = { ...this.state }
-        // console.log(playerStats);
         this.setState(prevState => ({
-          playerStats: { ...prevState.playerStats, dungeon: prevState.playerStats.dungeon + 1 },
+          playerStats: {
+            ...prevState.playerStats,
+            dungeon: prevState.playerStats.dungeon + 1
+          },
           playerPos: [],
           monsters: [],
-          boardTiles: [],
+          boardTiles: []
         }));
         //Create new board
         return this.createMapTiles();
@@ -247,12 +261,32 @@ class Game extends Component {
     });
   };
 
+  playerDead = () => {
+    console.log('playerDead');
+    return this.setState({
+      gameMessage: 'Ouch, you have died!',
+      modalVisible: true,
+      playerStats: {...this.state.playerStats, alive: false, health: 'dead' },
+    });
+  };
+
+  clicked = () => {
+    this.setState(prevState => ({ modalVisible: !prevState.modalVisible }));
+  };
+
   render() {
-    const { playerStats, gameState } = this.state;
+    const {
+      playerStats,
+      gameState,
+      boardTiles,
+      modalVisible,
+      gameMessage
+    } = this.state;
     return (
       <div>
         <Hud playerStats={playerStats} gameState={gameState} />
-        <DungeonBoard tiles={this.state.boardTiles} />
+        <DungeonBoard tiles={boardTiles} />
+        <Modal visible={modalVisible} message={gameMessage} />
       </div>
     );
   }
